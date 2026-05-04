@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.arabicpt.folder.mapper.FolderMapper">
+
+    <select id="selectFolderList" resultType="com.arabicpt.folder.model.vo.FolderVO">
+        SELECT
+            FOLDER_ID,
+            MEMBER_ID,
+            FOLDER_NAME,
+            DESCRIPTION,
+            DISPLAY_ORDER,
+            IS_DEFAULT,
+            IS_ACTIVE,
+            CREATED_AT,
+            UPDATED_AT
+        FROM TB_FOLDER
+        WHERE MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+        ORDER BY DISPLAY_ORDER ASC, FOLDER_ID ASC
+    </select>
+
+    <select id="selectFolderById" resultType="com.arabicpt.folder.model.vo.FolderVO">
+        SELECT
+            FOLDER_ID,
+            MEMBER_ID,
+            FOLDER_NAME,
+            DESCRIPTION,
+            DISPLAY_ORDER,
+            IS_DEFAULT,
+            IS_ACTIVE,
+            CREATED_AT,
+            UPDATED_AT
+        FROM TB_FOLDER
+        WHERE FOLDER_ID = #{folderId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </select>
+
+    <select id="selectDefaultFolder" resultType="com.arabicpt.folder.model.vo.FolderVO">
+        SELECT
+            FOLDER_ID,
+            MEMBER_ID,
+            FOLDER_NAME,
+            DESCRIPTION,
+            DISPLAY_ORDER,
+            IS_DEFAULT,
+            IS_ACTIVE,
+            CREATED_AT,
+            UPDATED_AT
+        FROM TB_FOLDER
+        WHERE MEMBER_ID = #{memberId}
+          AND IS_DEFAULT = 'Y'
+          AND IS_ACTIVE = 'Y'
+        ORDER BY FOLDER_ID ASC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <insert id="insertFolder"
+            parameterType="com.arabicpt.folder.model.vo.FolderVO"
+            useGeneratedKeys="true"
+            keyProperty="folderId"
+            keyColumn="FOLDER_ID">
+        INSERT INTO TB_FOLDER (
+            MEMBER_ID,
+            FOLDER_NAME,
+            DESCRIPTION,
+            DISPLAY_ORDER,
+            IS_DEFAULT,
+            IS_ACTIVE
+        ) VALUES (
+            #{memberId},
+            #{folderName},
+            #{description, jdbcType=VARCHAR},
+            #{displayOrder},
+            #{isDefault},
+            #{isActive}
+        )
+    </insert>
+
+    <select id="countFolderName" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_FOLDER
+        WHERE MEMBER_ID = #{memberId}
+          AND FOLDER_NAME = #{folderName}
+          AND IS_ACTIVE = 'Y'
+    </select>
+
+    <update id="updateFolder" parameterType="com.arabicpt.folder.model.vo.FolderVO">
+        UPDATE TB_FOLDER
+        <set>
+            <if test="folderName != null">FOLDER_NAME = #{folderName},</if>
+            <if test="description != null">DESCRIPTION = #{description, jdbcType=VARCHAR},</if>
+            UPDATED_AT = SYSTIMESTAMP
+        </set>
+        WHERE FOLDER_ID = #{folderId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteFolder">
+        UPDATE TB_FOLDER
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE FOLDER_ID = #{folderId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="detachSentenceSetsFromFolder">
+        UPDATE TB_SENTENCE_SET
+        SET
+            FOLDER_ID = NULL,
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE FOLDER_ID = #{folderId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+</mapper>

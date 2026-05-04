@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: arabicpt-back
+  config:
+    import: optional:classpath:application-private.yml
+  datasource:
+    url: ${DB_URL:}
+    username: ${DB_USERNAME:}
+    password: ${DB_PASSWORD:}
+    driver-class-name: oracle.jdbc.OracleDriver
+
+server:
+  port: ${PORT:8080}
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.arabicpt
+  configuration:
+    map-underscore-to-camel-case: true

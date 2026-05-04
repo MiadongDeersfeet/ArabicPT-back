@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.arabicpt.sentence.mapper.SentenceMapper">
+
+    <insert id="insertSentence"
+            parameterType="com.arabicpt.sentence.model.vo.SentenceVO"
+            useGeneratedKeys="true"
+            keyProperty="sentenceId"
+            keyColumn="SENTENCE_ID">
+        INSERT INTO TB_SENTENCE (
+            MEMBER_ID,
+            SET_ID,
+            FRONT_LANG,
+            FRONT_TEXT,
+            BACK_LANG,
+            BACK_TEXT,
+            MEMO,
+            DISPLAY_ORDER,
+            IS_ACTIVE
+        ) VALUES (
+            #{memberId},
+            #{setId},
+            #{frontLang},
+            #{frontText},
+            #{backLang},
+            #{backText},
+            #{memo, jdbcType=VARCHAR},
+            #{displayOrder},
+            #{isActive}
+        )
+    </insert>
+
+    <select id="selectSentenceListBySetId" resultType="com.arabicpt.sentence.model.dto.SentenceResponseDTO">
+        SELECT
+            s.SENTENCE_ID,
+            s.SET_ID,
+            t.SET_NAME AS setName,
+            s.FRONT_LANG,
+            s.FRONT_TEXT,
+            s.BACK_LANG,
+            s.BACK_TEXT,
+            s.MEMO,
+            s.DISPLAY_ORDER,
+            s.IS_ACTIVE,
+            s.CREATED_AT,
+            s.UPDATED_AT
+        FROM TB_SENTENCE s
+        JOIN TB_SENTENCE_SET t
+            ON t.SET_ID = s.SET_ID
+           AND t.MEMBER_ID = s.MEMBER_ID
+        WHERE s.SET_ID = #{setId}
+          AND s.MEMBER_ID = #{memberId}
+          AND s.IS_ACTIVE = 'Y'
+          AND t.IS_ACTIVE = 'Y'
+        ORDER BY s.DISPLAY_ORDER ASC, s.SENTENCE_ID DESC
+    </select>
+
+    <select id="selectSentenceById" resultType="com.arabicpt.sentence.model.dto.SentenceResponseDTO">
+        SELECT
+            s.SENTENCE_ID,
+            s.SET_ID,
+            t.SET_NAME AS setName,
+            s.FRONT_LANG,
+            s.FRONT_TEXT,
+            s.BACK_LANG,
+            s.BACK_TEXT,
+            s.MEMO,
+            s.DISPLAY_ORDER,
+            s.IS_ACTIVE,
+            s.CREATED_AT,
+            s.UPDATED_AT
+        FROM TB_SENTENCE s
+        JOIN TB_SENTENCE_SET t
+            ON t.SET_ID = s.SET_ID
+           AND t.MEMBER_ID = s.MEMBER_ID
+        WHERE s.SENTENCE_ID = #{sentenceId}
+          AND s.MEMBER_ID = #{memberId}
+          AND s.IS_ACTIVE = 'Y'
+          AND t.IS_ACTIVE = 'Y'
+    </select>
+
+    <update id="updateSentence" parameterType="com.arabicpt.sentence.model.vo.SentenceVO">
+        UPDATE TB_SENTENCE
+        <set>
+            <if test="frontLang != null">FRONT_LANG = #{frontLang},</if>
+            <if test="frontText != null">FRONT_TEXT = #{frontText},</if>
+            <if test="backLang != null">BACK_LANG = #{backLang},</if>
+            <if test="backText != null">BACK_TEXT = #{backText},</if>
+            <if test="memo != null">MEMO = #{memo, jdbcType=VARCHAR},</if>
+            <if test="displayOrder != null">DISPLAY_ORDER = #{displayOrder},</if>
+            UPDATED_AT = SYSTIMESTAMP
+        </set>
+        WHERE SENTENCE_ID = #{sentenceId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteSentence">
+        UPDATE TB_SENTENCE
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE SENTENCE_ID = #{sentenceId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteSentencesBySetId">
+        UPDATE TB_SENTENCE
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE SET_ID = #{setId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <select id="countActiveSetById" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SENTENCE_SET
+        WHERE SET_ID = #{setId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </select>
+
+</mapper>

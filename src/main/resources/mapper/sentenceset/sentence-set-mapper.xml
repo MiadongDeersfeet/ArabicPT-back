@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.arabicpt.sentenceset.mapper.SentenceSetMapper">
+
+    <insert id="insertSentenceSet"
+            parameterType="com.arabicpt.sentenceset.model.vo.SentenceSetVO"
+            useGeneratedKeys="true"
+            keyProperty="setId"
+            keyColumn="SET_ID">
+        INSERT INTO TB_SENTENCE_SET (
+            MEMBER_ID,
+            FOLDER_ID,
+            SET_NAME,
+            DESCRIPTION,
+            DISPLAY_ORDER,
+            IS_ACTIVE
+        ) VALUES (
+            #{memberId},
+            #{folderId, jdbcType=NUMERIC},
+            #{setName},
+            #{description, jdbcType=VARCHAR},
+            #{displayOrder},
+            #{isActive}
+        )
+    </insert>
+
+    <select id="selectSentenceSetList" resultType="com.arabicpt.sentenceset.model.dto.SentenceSetResponseDTO">
+        SELECT
+            s.SET_ID,
+            s.FOLDER_ID,
+            f.FOLDER_NAME AS folderName,
+            s.SET_NAME,
+            s.DESCRIPTION,
+            s.DISPLAY_ORDER,
+            s.IS_ACTIVE,
+            s.CREATED_AT,
+            s.UPDATED_AT
+        FROM TB_SENTENCE_SET s
+        LEFT JOIN TB_FOLDER f
+            ON f.FOLDER_ID = s.FOLDER_ID
+           AND f.MEMBER_ID = s.MEMBER_ID
+           AND f.IS_ACTIVE = 'Y'
+        WHERE s.MEMBER_ID = #{memberId}
+          AND s.IS_ACTIVE = 'Y'
+        <if test="folderId != null">
+            AND s.FOLDER_ID = #{folderId, jdbcType=NUMERIC}
+        </if>
+        ORDER BY s.DISPLAY_ORDER ASC, s.SET_ID DESC
+    </select>
+
+    <select id="selectSentenceSetById" resultType="com.arabicpt.sentenceset.model.dto.SentenceSetResponseDTO">
+        SELECT
+            s.SET_ID,
+            s.FOLDER_ID,
+            f.FOLDER_NAME AS folderName,
+            s.SET_NAME,
+            s.DESCRIPTION,
+            s.DISPLAY_ORDER,
+            s.IS_ACTIVE,
+            s.CREATED_AT,
+            s.UPDATED_AT
+        FROM TB_SENTENCE_SET s
+        LEFT JOIN TB_FOLDER f
+            ON f.FOLDER_ID = s.FOLDER_ID
+           AND f.MEMBER_ID = s.MEMBER_ID
+           AND f.IS_ACTIVE = 'Y'
+        WHERE s.SET_ID = #{setId}
+          AND s.MEMBER_ID = #{memberId}
+          AND s.IS_ACTIVE = 'Y'
+    </select>
+
+    <update id="updateSentenceSet" parameterType="com.arabicpt.sentenceset.model.vo.SentenceSetVO">
+        UPDATE TB_SENTENCE_SET
+        <set>
+            <if test="setName != null">SET_NAME = #{setName},</if>
+            <if test="description != null">DESCRIPTION = #{description, jdbcType=VARCHAR},</if>
+            <choose>
+                <when test="detachFromFolder != null and detachFromFolder == true">
+                    FOLDER_ID = NULL,
+                </when>
+                <when test="folderId != null">
+                    FOLDER_ID = #{folderId, jdbcType=NUMERIC},
+                </when>
+            </choose>
+            UPDATED_AT = SYSTIMESTAMP
+        </set>
+        WHERE SET_ID = #{setId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteSentenceSet">
+        UPDATE TB_SENTENCE_SET
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE SET_ID = #{setId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <select id="countActiveById" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_SENTENCE_SET
+        WHERE SET_ID = #{setId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </select>
+
+</mapper>

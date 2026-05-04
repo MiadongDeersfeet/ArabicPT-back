@@ -1,0 +1,52 @@
+# --- Gradle / Java build (로컬 빌드 산출물) ---
+.gradle/
+.gradle-tmp/
+.gradle-build/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+*.class
+*.log
+*.tmp
+hs_err_pid*
+
+# --- 환경 변수·시크릿 (민감정보 — 커밋 금지) ---
+.env
+.env.*
+!.env.example
+.envrc
+
+# Spring Boot: 로컬/비공개 설정 (DB, OAuth, API 키 등)
+# application.yml 에서 optional import 하는 파일명과 맞출 것
+application-private.yml
+application-local.yml
+application-secrets.yml
+application-secret.yml
+**/application-private.yml
+**/application-local.yml
+**/application-secrets.yml
+**/application-secret.yml
+
+# 키·스토어 (로컬에 둔 TLS·OAuth용)
+*.p12
+*.jks
+*.keystore
+id_rsa
+id_ed25519
+*.local.pem
+
+# 기타 시크릿 경로
+secrets/
+credentials.json
+google-credentials.json
+*-credentials.json
+application-credentials.yml
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
+.vscode/
+*.swp
+*~
