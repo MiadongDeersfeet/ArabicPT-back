@@ -1,4 +1,3 @@
-:ㅉㅂ
 package com.arabicpt.folder.controller;
 
 import com.arabicpt.common.response.ApiResponseDTO;
