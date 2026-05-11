@@ -19,6 +19,8 @@ hs_err_pid*
 # Spring Boot: 로컬/비공개 설정 (DB, OAuth, API 키 등)
 # application.yml 에서 optional import 하는 파일명과 맞출 것
 application-private.yml
+src/main/resources/application-private.yml
+back/src/main/resources/application-private.yml
 application-local.yml
 application-secrets.yml
 application-secret.yml
@@ -41,6 +43,8 @@ credentials.json
 google-credentials.json
 *-credentials.json
 application-credentials.yml
+uploads/
+back/uploads/
 
 # OS / IDE
 .DS_Store

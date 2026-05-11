@@ -2,7 +2,48 @@
 <!DOCTYPE mapper
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.arabicpt.audio.mapper.AudioMapper">
+<mapper namespace="com.arabicpt.audio.mapper.SentenceAudioMapper">
+
+    <select id="selectActiveBySentenceId" resultType="com.arabicpt.audio.model.dto.SentenceAudioResponseDTO">
+        SELECT
+            a.AUDIO_ID,
+            a.SENTENCE_ID,
+            a.LANGUAGE_CODE,
+            a.VOICE_NAME,
+            a.AUDIO_TYPE,
+            a.SPEAKING_RATE,
+            a.AUDIO_URL,
+            a.STORAGE_KEY,
+            a.PROVIDER,
+            a.FORMAT,
+            a.IS_ACTIVE,
+            a.CREATED_AT,
+            a.UPDATED_AT
+        FROM TB_SENTENCE_AUDIO a
+        JOIN TB_SENTENCE s ON s.SENTENCE_ID = a.SENTENCE_ID
+        WHERE a.SENTENCE_ID = #{sentenceId}
+          AND s.MEMBER_ID = #{memberId}
+          AND s.IS_ACTIVE = 'Y'
+          AND a.IS_ACTIVE = 'Y'
+        ORDER BY a.AUDIO_ID DESC
+        FETCH FIRST 1 ROWS ONLY
+    </select>
+
+    <update id="deactivateActiveBySentenceId">
+        UPDATE TB_SENTENCE_AUDIO a
+        SET
+            a.IS_ACTIVE = 'N',
+            a.UPDATED_AT = SYSTIMESTAMP
+        WHERE a.SENTENCE_ID = #{sentenceId}
+          AND a.IS_ACTIVE = 'Y'
+          AND EXISTS (
+              SELECT 1
+              FROM TB_SENTENCE s
+              WHERE s.SENTENCE_ID = a.SENTENCE_ID
+                AND s.MEMBER_ID = #{memberId}
+                AND s.IS_ACTIVE = 'Y'
+          )
+    </update>
 
     <insert id="insertSentenceAudio"
             parameterType="com.arabicpt.audio.model.vo.SentenceAudioVO"
@@ -30,11 +71,11 @@
             #{storageKey, jdbcType=VARCHAR},
             #{provider, jdbcType=VARCHAR},
             #{format, jdbcType=VARCHAR},
-            #{isActive}
+            #{isActive, jdbcType=VARCHAR}
         )
     </insert>
 
-    <select id="selectSentenceAudioList" resultType="com.arabicpt.audio.model.dto.SentenceAudioResponseDTO">
+    <select id="selectByAudioId" resultType="com.arabicpt.audio.model.dto.SentenceAudioResponseDTO">
         SELECT
             a.AUDIO_ID,
             a.SENTENCE_ID,
@@ -51,11 +92,10 @@
             a.UPDATED_AT
         FROM TB_SENTENCE_AUDIO a
         JOIN TB_SENTENCE s ON s.SENTENCE_ID = a.SENTENCE_ID
-        WHERE a.SENTENCE_ID = #{sentenceId}
+        WHERE a.AUDIO_ID = #{audioId}
           AND s.MEMBER_ID = #{memberId}
-          AND a.IS_ACTIVE = 'Y'
           AND s.IS_ACTIVE = 'Y'
-        ORDER BY a.AUDIO_ID ASC
+        FETCH FIRST 1 ROWS ONLY
     </select>
 
 </mapper>

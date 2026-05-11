@@ -1,5 +1,6 @@
 package com.arabicpt.sentence.service;
 
+import com.arabicpt.audio.mapper.SentenceAudioMapper;
 import com.arabicpt.common.exception.BusinessException;
 import com.arabicpt.common.response.ResultCode;
 import com.arabicpt.sentence.mapper.SentenceMapper;
@@ -17,13 +18,15 @@ public class SentenceServiceImpl implements SentenceService {
 
     private final Long memberId;
     private final SentenceMapper sentenceMapper;
+    private final SentenceAudioMapper sentenceAudioMapper;
 
     private static final String DEFAULT_FRONT_LANG = "ko-KR";
     private static final String DEFAULT_BACK_LANG = "ar-SA";
 
-    public SentenceServiceImpl(SentenceMapper sentenceMapper) {
+    public SentenceServiceImpl(SentenceMapper sentenceMapper, SentenceAudioMapper sentenceAudioMapper) {
         this.memberId = 1L;
         this.sentenceMapper = sentenceMapper;
+        this.sentenceAudioMapper = sentenceAudioMapper;
     }
 
     @Override
@@ -110,6 +113,8 @@ public class SentenceServiceImpl implements SentenceService {
         }
 
         sentenceMapper.updateSentence(voBuilder.build());
+        // 문장 내용/언어가 바뀌었을 수 있으므로 기존 활성 오디오는 stale 처리합니다.
+        sentenceAudioMapper.deactivateActiveBySentenceId(sentenceId, memberId);
 
         SentenceResponseDTO updated = sentenceMapper.selectSentenceById(sentenceId, memberId);
         if (updated == null) {
