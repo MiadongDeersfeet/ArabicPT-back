@@ -21,6 +21,19 @@ spring:
 app:
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:https://arabicpt.cloud,https://www.arabicpt.cloud}
+  auth:
+    cookie:
+      secure: true
+      same-site: None
+      domain: arabicpt.cloud
+    oauth2:
+      success-redirect-uri: ${OAUTH2_SUCCESS_REDIRECT_URI:https://arabicpt.cloud/auth/callback}
+      failure-redirect-uri: ${OAUTH2_FAILURE_REDIRECT_URI:https://arabicpt.cloud/auth/callback}
+    jwt:
+      issuer: ${JWT_ISSUER:arabicpt}
+      secret: ${JWT_SECRET:}
+      access-token-expiration-seconds: ${JWT_ACCESS_TOKEN_EXP_SECONDS:3600}
+      refresh-token-expiration-seconds: ${JWT_REFRESH_TOKEN_EXP_SECONDS:1209600}
   audio:
     upload-dir: ${APP_AUDIO_UPLOAD_DIR:/home/opc/arabicpt/audio}
     public-path: ${APP_AUDIO_PUBLIC_PATH:/audio}

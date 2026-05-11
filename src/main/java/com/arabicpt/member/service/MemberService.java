@@ -1,5 +1,12 @@
 package com.arabicpt.member.service;
 
+import com.arabicpt.member.model.dto.MemberDTO;
+import com.arabicpt.member.model.dto.MemberUpsertDTO;
+
 public interface MemberService {
-    // 실제 회원 기능은 다음 단계에서 확장합니다.
+    MemberDTO findById(Long memberId);
+    MemberDTO findByGoogleSub(String googleSub);
+    MemberDTO findByEmail(String email);
+    Long upsert(MemberUpsertDTO memberUpsertDTO);
+    void touchLastLogin(Long memberId);
 }
