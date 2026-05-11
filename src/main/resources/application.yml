@@ -8,17 +8,6 @@ spring:
     username: ${DB_USERNAME:}
     password: ${DB_PASSWORD:}
     driver-class-name: oracle.jdbc.OracleDriver
-
-server:
-  port: ${PORT:8080}
-
-mybatis:
-  mapper-locations: classpath:/mapper/**/*.xml
-  type-aliases-package: com.arabicpt
-  configuration:
-    map-underscore-to-camel-case: true
-
-spring:
   security:
     oauth2:
       client:
@@ -32,6 +21,15 @@ spring:
         provider:
           google:
             user-name-attribute: sub
+
+server:
+  port: ${PORT:8080}
+
+mybatis:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.arabicpt
+  configuration:
+    map-underscore-to-camel-case: true
 
 app:
   cors:
