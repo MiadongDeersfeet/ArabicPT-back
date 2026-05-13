@@ -80,6 +80,23 @@ public class JwtService {
         }
     }
 
+    public Long extractMemberIdFromAccessToken(String accessToken) {
+        try {
+            Claims claims = Jwts.parser()
+                    .verifyWith(secretKey)
+                    .build()
+                    .parseSignedClaims(accessToken)
+                    .getPayload();
+
+            if (!"access".equals(claims.get("type"))) {
+                throw new BusinessException(ResultCode.UNAUTHORIZED, "유효하지 않은 액세스 토큰 타입입니다.");
+            }
+            return Long.valueOf(claims.getSubject());
+        } catch (JwtException | IllegalArgumentException ex) {
+            throw new BusinessException(ResultCode.UNAUTHORIZED, "유효하지 않은 액세스 토큰입니다.");
+        }
+    }
+
     public long getAccessTokenExpirationSeconds() {
         return accessTokenExpirationSeconds;
     }
