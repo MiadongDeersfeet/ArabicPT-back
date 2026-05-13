@@ -5,6 +5,7 @@ import com.arabicpt.common.exception.BusinessException;
 import com.arabicpt.common.response.ApiResponseDTO;
 import com.arabicpt.common.response.ResultCode;
 import com.arabicpt.member.model.dto.MemberDTO;
+import com.arabicpt.member.model.dto.MemberMeResponseDTO;
 import com.arabicpt.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +24,7 @@ public class MemberController {
     private final JwtService jwtService;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponseDTO<MemberDTO>> getMe(
+    public ResponseEntity<ApiResponseDTO<MemberMeResponseDTO>> getMe(
             @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             throw new BusinessException(ResultCode.UNAUTHORIZED, "액세스 토큰이 필요합니다.");
@@ -34,6 +35,6 @@ public class MemberController {
         if (member == null || !"Y".equals(member.getStatus())) {
             throw new BusinessException(ResultCode.UNAUTHORIZED, "사용할 수 없는 회원입니다.");
         }
-        return ResponseEntity.ok(ApiResponseDTO.success(member));
+        return ResponseEntity.ok(ApiResponseDTO.success(MemberMeResponseDTO.from(member)));
     }
 }
