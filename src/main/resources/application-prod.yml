@@ -6,7 +6,9 @@
 # =====================================================
 
 server:
-  port: ${PORT:8081}          # NoorSchool 8080과 충돌 방지
+  port: ${PORT:8081}          # 동일 호스트에서 8080 사용 시 기본 8081
+  # Nginx 등 리버스 프록시 뒤에서 X-Forwarded-Proto 를 반영해 OAuth redirect_uri 가 https 가 되게 함
+  forward-headers-strategy: framework
 
 spring:
   datasource:
