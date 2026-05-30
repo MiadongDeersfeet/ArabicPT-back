@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.arabicpt.paragraph.mapper.ParagraphMapper">
+
+    <insert id="insertParagraph"
+            parameterType="com.arabicpt.paragraph.model.vo.ParagraphVO"
+            useGeneratedKeys="true"
+            keyProperty="paragraphId"
+            keyColumn="PARAGRAPH_ID">
+        INSERT INTO TB_PARAGRAPH (
+            MEMBER_ID,
+            PARAGRAPH_SET_ID,
+            FRONT_LANG,
+            FRONT_TEXT,
+            BACK_LANG,
+            BACK_TEXT,
+            MEMO,
+            DISPLAY_ORDER,
+            IS_ACTIVE
+        ) VALUES (
+            #{memberId},
+            #{paragraphSetId},
+            #{frontLang},
+            #{frontText, jdbcType=CLOB},
+            #{backLang},
+            #{backText, jdbcType=CLOB},
+            #{memo, jdbcType=CLOB},
+            #{displayOrder},
+            #{isActive}
+        )
+    </insert>
+
+    <sql id="paragraphSelectColumns">
+        p.PARAGRAPH_ID,
+        p.PARAGRAPH_SET_ID,
+        ps.SET_NAME AS setName,
+        p.FRONT_LANG,
+        p.FRONT_TEXT,
+        p.BACK_LANG,
+        p.BACK_TEXT,
+        p.MEMO,
+        p.DISPLAY_ORDER,
+        p.IS_ACTIVE,
+        p.CREATED_AT,
+        p.UPDATED_AT
+    </sql>
+
+    <select id="selectParagraphListBySetId" resultType="com.arabicpt.paragraph.model.dto.ParagraphResponseDTO">
+        SELECT
+            <include refid="paragraphSelectColumns"/>
+        FROM TB_PARAGRAPH p
+        JOIN TB_PARAGRAPH_SET ps
+            ON ps.PARAGRAPH_SET_ID = p.PARAGRAPH_SET_ID
+           AND ps.MEMBER_ID = p.MEMBER_ID
+        WHERE p.PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND p.MEMBER_ID = #{memberId}
+          AND p.IS_ACTIVE = 'Y'
+          AND ps.IS_ACTIVE = 'Y'
+        ORDER BY p.DISPLAY_ORDER ASC, p.PARAGRAPH_ID ASC
+    </select>
+
+    <select id="selectParagraphById" resultType="com.arabicpt.paragraph.model.dto.ParagraphResponseDTO">
+        SELECT
+            <include refid="paragraphSelectColumns"/>
+        FROM TB_PARAGRAPH p
+        JOIN TB_PARAGRAPH_SET ps
+            ON ps.PARAGRAPH_SET_ID = p.PARAGRAPH_SET_ID
+           AND ps.MEMBER_ID = p.MEMBER_ID
+        WHERE p.PARAGRAPH_ID = #{paragraphId}
+          AND p.MEMBER_ID = #{memberId}
+          AND p.IS_ACTIVE = 'Y'
+          AND ps.IS_ACTIVE = 'Y'
+    </select>
+
+    <update id="updateParagraph" parameterType="com.arabicpt.paragraph.model.vo.ParagraphVO">
+        UPDATE TB_PARAGRAPH
+        <set>
+            <if test="frontLang != null">FRONT_LANG = #{frontLang},</if>
+            <if test="frontText != null">FRONT_TEXT = #{frontText, jdbcType=CLOB},</if>
+            <if test="backLang != null">BACK_LANG = #{backLang},</if>
+            <if test="backText != null">BACK_TEXT = #{backText, jdbcType=CLOB},</if>
+            <if test="memo != null">MEMO = #{memo, jdbcType=CLOB},</if>
+            <if test="displayOrder != null">DISPLAY_ORDER = #{displayOrder},</if>
+            UPDATED_AT = SYSTIMESTAMP
+        </set>
+        WHERE PARAGRAPH_ID = #{paragraphId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteParagraph">
+        UPDATE TB_PARAGRAPH
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE PARAGRAPH_ID = #{paragraphId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteParagraphsBySetId">
+        UPDATE TB_PARAGRAPH
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <select id="countActiveSetById" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_PARAGRAPH_SET
+        WHERE PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </select>
+
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.arabicpt.paragraphset.mapper.ParagraphSetMapper">
+
+    <insert id="insertParagraphSet"
+            parameterType="com.arabicpt.paragraphset.model.vo.ParagraphSetVO"
+            useGeneratedKeys="true"
+            keyProperty="paragraphSetId"
+            keyColumn="PARAGRAPH_SET_ID">
+        INSERT INTO TB_PARAGRAPH_SET (
+            MEMBER_ID,
+            FOLDER_ID,
+            SET_NAME,
+            DESCRIPTION,
+            DISPLAY_ORDER,
+            IS_ACTIVE
+        ) VALUES (
+            #{memberId},
+            #{folderId, jdbcType=NUMERIC},
+            #{setName},
+            #{description, jdbcType=VARCHAR},
+            #{displayOrder},
+            #{isActive}
+        )
+    </insert>
+
+    <sql id="paragraphSetSelectColumns">
+        ps.PARAGRAPH_SET_ID,
+        ps.FOLDER_ID,
+        f.FOLDER_NAME AS folderName,
+        ps.SET_NAME,
+        ps.DESCRIPTION,
+        ps.DISPLAY_ORDER,
+        ps.IS_ACTIVE,
+        (
+            SELECT COUNT(*)
+            FROM TB_PARAGRAPH p
+            WHERE p.PARAGRAPH_SET_ID = ps.PARAGRAPH_SET_ID
+              AND p.MEMBER_ID = ps.MEMBER_ID
+              AND p.IS_ACTIVE = 'Y'
+        ) AS paragraphCount,
+        ps.CREATED_AT,
+        ps.UPDATED_AT
+    </sql>
+
+    <select id="selectParagraphSetList" resultType="com.arabicpt.paragraphset.model.dto.ParagraphSetResponseDTO">
+        SELECT
+            <include refid="paragraphSetSelectColumns"/>
+        FROM TB_PARAGRAPH_SET ps
+        LEFT JOIN TB_FOLDER f
+            ON f.FOLDER_ID = ps.FOLDER_ID
+           AND f.MEMBER_ID = ps.MEMBER_ID
+           AND f.IS_ACTIVE = 'Y'
+        WHERE ps.MEMBER_ID = #{memberId}
+          AND ps.IS_ACTIVE = 'Y'
+        <if test="folderId != null">
+            AND ps.FOLDER_ID = #{folderId, jdbcType=NUMERIC}
+        </if>
+        ORDER BY ps.DISPLAY_ORDER ASC, ps.PARAGRAPH_SET_ID DESC
+    </select>
+
+    <select id="selectParagraphSetById" resultType="com.arabicpt.paragraphset.model.dto.ParagraphSetResponseDTO">
+        SELECT
+            <include refid="paragraphSetSelectColumns"/>
+        FROM TB_PARAGRAPH_SET ps
+        LEFT JOIN TB_FOLDER f
+            ON f.FOLDER_ID = ps.FOLDER_ID
+           AND f.MEMBER_ID = ps.MEMBER_ID
+           AND f.IS_ACTIVE = 'Y'
+        WHERE ps.PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND ps.MEMBER_ID = #{memberId}
+          AND ps.IS_ACTIVE = 'Y'
+    </select>
+
+    <update id="updateParagraphSet" parameterType="com.arabicpt.paragraphset.model.vo.ParagraphSetVO">
+        UPDATE TB_PARAGRAPH_SET
+        <set>
+            <if test="setName != null">SET_NAME = #{setName},</if>
+            <if test="description != null">DESCRIPTION = #{description, jdbcType=VARCHAR},</if>
+            <choose>
+                <when test="detachFromFolder != null and detachFromFolder == true">
+                    FOLDER_ID = NULL,
+                </when>
+                <when test="folderId != null">
+                    FOLDER_ID = #{folderId, jdbcType=NUMERIC},
+                </when>
+            </choose>
+            UPDATED_AT = SYSTIMESTAMP
+        </set>
+        WHERE PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <update id="softDeleteParagraphSet">
+        UPDATE TB_PARAGRAPH_SET
+        SET
+            IS_ACTIVE = 'N',
+            UPDATED_AT = SYSTIMESTAMP
+        WHERE PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </update>
+
+    <select id="countActiveById" resultType="int">
+        SELECT COUNT(*)
+        FROM TB_PARAGRAPH_SET
+        WHERE PARAGRAPH_SET_ID = #{paragraphSetId}
+          AND MEMBER_ID = #{memberId}
+          AND IS_ACTIVE = 'Y'
+    </select>
+
+</mapper>

@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Configuration;
     "com.arabicpt.folder.mapper",
     "com.arabicpt.sentence.mapper",
     "com.arabicpt.sentenceset.mapper",
+    "com.arabicpt.paragraph.mapper",
+    "com.arabicpt.paragraphset.mapper",
     "com.arabicpt.audio.mapper"
 })
 public class MyBatisConfig {
